@@ -6,8 +6,8 @@ using UnityEngine;
 using Random = UnityEngine.Random;
 
 public class GameManager : MonoBehaviour {
-    public const int TREE_X_OFFSET = 5;
-    public const int TREE_Y_OFFSET = 5;
+    public const int TREE_X_OFFSET = 10;
+    public const int TREE_Y_OFFSET = 4;
     
     public GameObject rootPrefab;
     private Tree root = null;

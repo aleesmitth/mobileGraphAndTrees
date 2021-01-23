@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -14,8 +15,11 @@ public class Node {
         rightChild = null;
     }
 
-    public Node Insert(Node root, ref int value, ref Vector2 rootPosition, int n) {
+    public Node Insert(Node root, ref int value, ref Vector2 rootPosition, ref Vector2 parentPosition, int n) {
         n++;
+        if (n > 8) {
+            throw new HeightLimitException("Max tree height reached, cant insert node.");
+        }
         if (root == null) {
             Debug.Log("nuevo en n = " + n + " - vale : " + value + "\n");
             root = new Node();
@@ -26,17 +30,22 @@ public class Node {
         }
         else if (value > root.value) {
             Debug.Log("pasada r en n = " + n + " - vale : " + this.value + "\n");
-            rootPosition.x += GameManager.TREE_X_OFFSET;
+            parentPosition = rootPosition;
+            // divido por n para q no se superpongan los hijos de nodos hermanos.
+            rootPosition.x += (float)(GameManager.TREE_X_OFFSET - n/1.8);
             rootPosition.y -= GameManager.TREE_Y_OFFSET;
-            Debug.Log("inserta" + value + " en derecha de " + root.value + "\n");
-            root.rightChild = Insert(root.rightChild, ref value, ref rootPosition,n);
+            Debug.Log("inserta" + value + " en derecha de " + root.value + " parent position: " + parentPosition.x + "," + parentPosition.y+"\n");
+            root.rightChild = Insert(root.rightChild, ref value, ref rootPosition, ref parentPosition,n);
+
             /*Debug.Log("el hijo derecho de " + root.value + " es " + rightChild + " y su valor es " + rightChild.value + "\n");*/
         } else {
             Debug.Log("pasada l en n = " + n + " - vale : " + this.value + "\n");
-            rootPosition.x -= GameManager.TREE_X_OFFSET;
+            parentPosition = rootPosition;
+            // divido por n para q no se superpongan los hijos de nodos hermanos.
+            rootPosition.x -= (float)(GameManager.TREE_X_OFFSET - n/1.8);
             rootPosition.y -= GameManager.TREE_Y_OFFSET;
-            Debug.Log("inserta" + value + " en izquierda de " + root.value + "\n");
-            root.leftChild = Insert(root.leftChild, ref value, ref rootPosition,n);
+            Debug.Log("inserta" + value + " en izquierda de " + root.value + " parent position: " + parentPosition.x + "," + parentPosition.y+ "\n");
+            root.leftChild = Insert(root.leftChild, ref value, ref rootPosition, ref parentPosition,n);
             /*Debug.Log("el hijo izquierdo de " + root.value + " es " + leftChild + " y su valor es " + leftChild.value + "\n");*/
         }
 

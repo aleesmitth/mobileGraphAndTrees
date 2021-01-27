@@ -8,9 +8,8 @@ using Random = UnityEngine.Random;
 public class GameManager : MonoBehaviour {
     public const int TREE_X_OFFSET = 10;
     public const int TREE_Y_OFFSET = 4;
+    public const char MAGIC_KEY = '*';
     
-    public GameObject rootPrefab;
-    private Tree root = null;
     public static GameManager instance = null;
     private void Awake() {
         // if the singleton has been initialized yet
@@ -22,21 +21,5 @@ public class GameManager : MonoBehaviour {
         // if the singleton hasn't been initialized yet
         instance = this;
         DontDestroyOnLoad( this.gameObject );
-    }
-
-    public void Add() {
-        if (root == null) {
-            GameObject treeNode = Instantiate(rootPrefab) as GameObject;
-            root = treeNode.GetComponent<Tree>();
-            treeNode.GetComponentInChildren<TextMeshProUGUI>().text = root.Value.ToString();
-            Debug.Log(root.Value + "\n");
-        }
-        else {
-            root.Insert();
-        }
-    }
-
-    public void Printtree() {
-        root.PrintTree();
     }
 }

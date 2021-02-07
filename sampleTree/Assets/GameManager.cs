@@ -22,4 +22,12 @@ public class GameManager : MonoBehaviour {
         instance = this;
         DontDestroyOnLoad( this.gameObject );
     }
+
+    public void Test() {
+        Node node1 = new Node();
+        node1.value = 1;
+        Node node2 = node1;
+        node2 = null;
+        print(node1);
+    }
 }

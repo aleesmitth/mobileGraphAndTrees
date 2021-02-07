@@ -40,7 +40,7 @@ public class Tree : MonoBehaviour {
 
 
     public void Insert() {
-        for (int i = 0; i < 10; i++) {
+        //for (int i = 0; i < 10; i++) {
             Vector2 insertedPosition = Vector2.zero;
             Vector2 parentPosition = Vector2.zero;
             int value = Random.Range(0, 500);
@@ -64,9 +64,9 @@ public class Tree : MonoBehaviour {
             lastInsertedNodeBuffer = node;
 
             AddNodeToDictionary(node, insertedPosition);
-            print(value);
-            print(insertedPosition.x + " " + insertedPosition.y);
-        }
+            /*print(value);
+            print(insertedPosition.x + " " + insertedPosition.y);*/
+        //}
     }
 
     private void AddNodeToDictionary(GameObject node, Vector3 insertedPosition) {
@@ -82,16 +82,16 @@ public class Tree : MonoBehaviour {
         print(nodePosition);
         //deletes the node from the tree.
         int n = 0;
-        Dictionary<string, string> positionsUpdated = new Dictionary<string, string>();
+        Dictionary<string, string> textNodeUpdate = new Dictionary<string, string>();
         var node = root.SearchNode(new Vector2(nodePosition.x, nodePosition.y), int.Parse(textMeshProUGUI.text), root, ref n);
-        print(node.position);
-        root.DeleteNode(node, n, positionsUpdated);
+        root.DeleteNode(ref node, textNodeUpdate, out string deletedNodeKey);
         //
-        //deletes the node from the scene.
-        foreach(KeyValuePair<string, string> entry in positionsUpdated) {
-            var newPosition = entry.Value.Split(GameManager.MAGIC_KEY);
-            nodesDictionary[entry.Key].transform.position = new Vector3(int.Parse(newPosition[0]), int.Parse(newPosition[1]), 0);
+        //updates text of modified nodes.
+        foreach(KeyValuePair<string, string> entry in textNodeUpdate) {
+            nodesDictionary[entry.Key].GetComponentInChildren<TextMeshProUGUI>().text = entry.Value;
         }
+
+        Destroy(nodesDictionary[deletedNodeKey]);
         //var key = nodePosition.x.ToString(CultureInfo.InvariantCulture) + nodePosition.y;
         //Destroy(nodesDictionary[key]);
     }

@@ -1,11 +1,13 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
 public class NodeDeleter : MonoBehaviour {
     public TextMeshProUGUI textMeshProUGUI;
-    public void DeleteNode() {
+
+    private void OnMouseDown() {
         EventManager.OnDeleteNode(transform.position, textMeshProUGUI);
     }
 }

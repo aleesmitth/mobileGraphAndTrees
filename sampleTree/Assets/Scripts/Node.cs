@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using TMPro;
@@ -9,9 +8,9 @@ public class Node {
     private const int LEFT = -1;
     private const int RIGHT = 1;
     public Vector2 position;
-    public Node parent;
-    public Node leftChild = null;
-    public Node rightChild = null;
+    private Node parent;
+    private Node leftChild = null;
+    private Node rightChild = null;
     public int value;
 
     public Node() {
@@ -25,6 +24,10 @@ public class Node {
             throw new HeightTreeLimitException("Max tree height reached, cant insert node.");
         }
         if (node == null) {
+            // hardcodeo para no tener 2 nodos superpuestos. no se coloca si ya hay uno ahi.
+            if (GameManager.instance.IsPositionOccupied(rootPosition.x, rootPosition.y)) {
+                throw new PositionOccupiedByNodeException("Position already occupied by another node.");
+            }
             Debug.Log("nuevo en n = " + n + " - vale : " + value + "\n");
             node = new Node();
             node.position.x = rootPosition.x;
@@ -37,7 +40,7 @@ public class Node {
             Debug.Log("pasada r en n = " + n + " - vale : " + this.value + "\n");
             parentPosition = rootPosition;
             // divido por n para q no se superpongan los hijos de nodos hermanos.
-            rootPosition.x += (float)(GameManager.TREE_X_OFFSET - n/GameManager.NODE_SEPARATOR);
+            rootPosition.x += (float)(GameManager.TREE_X_OFFSET - n);
             rootPosition.y -= GameManager.TREE_Y_OFFSET;
             Debug.Log("inserta" + value + " en derecha de " + node.value + " parent position: " + parentPosition.x + "," + parentPosition.y+"\n");
             node.rightChild = Insert(node.rightChild, ref value, ref rootPosition, ref parentPosition, n, node);
@@ -47,7 +50,7 @@ public class Node {
             Debug.Log("pasada l en n = " + n + " - vale : " + this.value + "\n");
             parentPosition = rootPosition;
             // divido por n para q no se superpongan los hijos de nodos hermanos.
-            rootPosition.x -= (float)(GameManager.TREE_X_OFFSET - n/GameManager.NODE_SEPARATOR);
+            rootPosition.x -= (float)(GameManager.TREE_X_OFFSET - n);
             rootPosition.y -= GameManager.TREE_Y_OFFSET;
             Debug.Log("inserta" + value + " en izquierda de " + node.value + " parent position: " + parentPosition.x + "," + parentPosition.y+ "\n");
             node.leftChild = Insert(node.leftChild, ref value, ref rootPosition, ref parentPosition, n, node);
@@ -70,6 +73,7 @@ public class Node {
         PrintTree(root.rightChild);
     }
 
+    //searching for node in tree, if nonexistent return null.
     public Node SearchNode(Vector2 position, int value, Node root, ref int n) {
         n++;
         if (root == null) return null;
@@ -83,7 +87,7 @@ public class Node {
     public void DeleteNode(Node node, Dictionary<string, string> textNodesUpdate, out string deletedNodeKey) {
         if (node.rightChild == null && node.leftChild == null) {
             deletedNodeKey = node.position.x.ToString(CultureInfo.InvariantCulture) + GameManager.MAGIC_KEY + node.position.y;
-            //aca solo lo borro
+            //borro el nodo de mi arbol,dejando al padre sin el hijo correspondiente.
             if (node.parent.rightChild != null && node.parent.rightChild.position == node.position) node.parent.rightChild = null;
             else {
                 node.parent.leftChild = null;
@@ -119,8 +123,8 @@ public class Node {
         // guardo la posicion vieja del nodo
         var key = node.position.x.ToString(CultureInfo.InvariantCulture) + GameManager.MAGIC_KEY + node.position.y;
         
-        if(direction == LEFT) node.position.x += (float)(GameManager.TREE_X_OFFSET + n / GameManager.NODE_SEPARATOR);
-        else node.position.x -= (float)(GameManager.TREE_X_OFFSET + n / GameManager.NODE_SEPARATOR);
+        if(direction == LEFT) node.position.x += (float)(GameManager.TREE_X_OFFSET + n);
+        else node.position.x -= (float)(GameManager.TREE_X_OFFSET + n);
         node.position.y -= (GameManager.TREE_Y_OFFSET);
 
         // guardo la posicion nueva del nodo

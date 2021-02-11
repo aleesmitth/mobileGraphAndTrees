@@ -42,7 +42,7 @@ public class Tree : MonoBehaviour {
 
 
     public void Insert() {
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 50; i++) {
             Vector2 insertedPosition = root.position;
             Vector2 parentPosition = Vector2.zero;
             int value = Random.Range(0, 500);
@@ -50,6 +50,10 @@ public class Tree : MonoBehaviour {
                 root = root.Insert(root, ref value, ref insertedPosition, ref parentPosition, -1);
             }
             catch (HeightTreeLimitException e) {
+                Debug.Log(e.Message);
+                return;
+            }
+            catch (PositionOccupiedByNodeException e) {
                 Debug.Log(e.Message);
                 return;
             }
@@ -107,5 +111,9 @@ public class Tree : MonoBehaviour {
         foreach (var node in nodesDictionary) {
             print(node.Value.transform.position);
         }
+    }
+
+    public bool IsPositionOccupied(float x, float y) {
+        return nodesDictionary.ContainsKey(x.ToString(CultureInfo.InvariantCulture) + GameManager.MAGIC_KEY + y);
     }
 }

@@ -6,11 +6,11 @@ using UnityEngine;
 using Random = UnityEngine.Random;
 
 public class GameManager : MonoBehaviour {
-    public const int MAX_HEIGHT = 7;
-    public const double NODE_SEPARATOR = 1;
+    public const int MAX_HEIGHT = 9;
     public const int TREE_X_OFFSET = 10;
     public const int TREE_Y_OFFSET = 4;
     public const char MAGIC_KEY = '*';
+    public Tree tree;
     
     public static GameManager instance = null;
     private void Awake() {
@@ -25,11 +25,17 @@ public class GameManager : MonoBehaviour {
         DontDestroyOnLoad( this.gameObject );
     }
 
-    public void Test() {
+    public bool IsPositionOccupied(float x, float y) {
+        return tree.IsPositionOccupied(x, y);
+    }
+
+    public void Testtt() {
         Node node1 = new Node();
-        node1.value = 1;
-        Node node2 = node1;
+        ref Node node2 = ref node1;
+        var node3 = node2;
         node2 = null;
         print(node1);
+        print(node2);
+        print(node3);
     }
 }

@@ -25,6 +25,8 @@ public class Tree : MonoBehaviour {
         nodesDictionary = new Dictionary<string, GameObject>();
         root = new Node();
         root.value = -1;
+        root.position.x = -(float)GameManager.TREE_X_OFFSET;
+        root.position.y = GameManager.TREE_Y_OFFSET;
         /*
         Value = root.value;
         Debug.Log(root.value + "\n");*/
@@ -40,33 +42,34 @@ public class Tree : MonoBehaviour {
 
 
     public void Insert() {
-        //for (int i = 0; i < 10; i++) {
-            Vector2 insertedPosition = Vector2.zero;
+        for (int i = 0; i < 10; i++) {
+            Vector2 insertedPosition = root.position;
             Vector2 parentPosition = Vector2.zero;
             int value = Random.Range(0, 500);
             try {
                 root = root.Insert(root, ref value, ref insertedPosition, ref parentPosition, -1);
             }
-            catch (HeightLimitException e) {
+            catch (HeightTreeLimitException e) {
                 Debug.Log(e.Message);
                 return;
             }
 
-            if (lastInsertedNodeBuffer != null) {
-                print(lastInsertedNodeBuffer.GetComponentInChildren<MeshRenderer>().material = defaultNodeMat);
-            }
-
             GameObject node = Instantiate(treeNodePrefab, insertedPosition, Quaternion.identity);
             node.GetComponentInChildren<TextMeshProUGUI>().text = value.ToString();
-            LineRenderer lineRenderer = node.GetComponent<LineRenderer>();
-            lineRenderer.SetPosition(0, new Vector3(insertedPosition.x, insertedPosition.y, 0));
-            lineRenderer.SetPosition(1, new Vector3(parentPosition.x, parentPosition.y, 0));
+            
+            // restaura color del nodo insertado previamente a la normalidad y dibuja branch
+            if (lastInsertedNodeBuffer != null) {
+                print(lastInsertedNodeBuffer.GetComponentInChildren<MeshRenderer>().material = defaultNodeMat);
+                LineRenderer lineRenderer = node.GetComponent<LineRenderer>();
+                lineRenderer.SetPosition(0, new Vector3(insertedPosition.x, insertedPosition.y, 0));
+                lineRenderer.SetPosition(1, new Vector3(parentPosition.x, parentPosition.y, 0));
+            }
             lastInsertedNodeBuffer = node;
 
             AddNodeToDictionary(node, insertedPosition);
             /*print(value);
             print(insertedPosition.x + " " + insertedPosition.y);*/
-        //}
+        }
     }
 
     private void AddNodeToDictionary(GameObject node, Vector3 insertedPosition) {
@@ -82,17 +85,27 @@ public class Tree : MonoBehaviour {
         print(nodePosition);
         //deletes the node from the tree.
         int n = 0;
-        Dictionary<string, string> textNodeUpdate = new Dictionary<string, string>();
+        Dictionary<string, string> textNodesUpdate = new Dictionary<string, string>();
         var node = root.SearchNode(new Vector2(nodePosition.x, nodePosition.y), int.Parse(textMeshProUGUI.text), root, ref n);
-        root.DeleteNode(ref node, textNodeUpdate, out string deletedNodeKey);
+        root.DeleteNode(node, textNodesUpdate, out string deletedNodeKey);
         //
         //updates text of modified nodes.
-        foreach(KeyValuePair<string, string> entry in textNodeUpdate) {
+        foreach(KeyValuePair<string, string> entry in textNodesUpdate) {
             nodesDictionary[entry.Key].GetComponentInChildren<TextMeshProUGUI>().text = entry.Value;
         }
-
+        print("LLEGUE HASTA FINAL DE DELETE Y BORRE EL " + nodesDictionary[deletedNodeKey].transform.position);
+        
+        //borro el nodo de la escena
         Destroy(nodesDictionary[deletedNodeKey]);
+        //borro el nodo de mi lista de nodos activos
+        nodesDictionary.Remove(deletedNodeKey);
         //var key = nodePosition.x.ToString(CultureInfo.InvariantCulture) + nodePosition.y;
         //Destroy(nodesDictionary[key]);
+    }
+
+    public void PrintListOfNodes() {
+        foreach (var node in nodesDictionary) {
+            print(node.Value.transform.position);
+        }
     }
 }

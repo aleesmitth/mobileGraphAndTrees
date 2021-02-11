@@ -6,6 +6,8 @@ using UnityEngine;
 using Random = UnityEngine.Random;
 
 public class GameManager : MonoBehaviour {
+    public const int MAX_HEIGHT = 7;
+    public const double NODE_SEPARATOR = 1;
     public const int TREE_X_OFFSET = 10;
     public const int TREE_Y_OFFSET = 4;
     public const char MAGIC_KEY = '*';

@@ -18,42 +18,42 @@ public class Node {
         rightChild = null;
     }
 
-    public Node Insert(Node node, ref int value, ref Vector2 rootPosition, ref Vector2 parentPosition, int n, Node parent = null) {
+    public Node Insert(Node node, ref int value, ref Vector2 insertedPosition, ref Vector2 parentPosition, int n, Node parent = null) {
         n++;
         if (n > GameManager.MAX_HEIGHT) {
             throw new HeightTreeLimitException("Max tree height reached, cant insert node.");
         }
         if (node == null) {
             // hardcodeo para no tener 2 nodos superpuestos. no se coloca si ya hay uno ahi.
-            if (GameManager.instance.IsPositionOccupied(rootPosition.x, rootPosition.y)) {
+            if (GameManager.instance.IsPositionOccupied(insertedPosition.x, insertedPosition.y)) {
                 throw new PositionOccupiedByNodeException("Position already occupied by another node.");
             }
             Debug.Log("nuevo en n = " + n + " - vale : " + value + "\n");
             node = new Node();
-            node.position.x = rootPosition.x;
-            node.position.y = rootPosition.y;
+            node.position.x = insertedPosition.x;
+            node.position.y = insertedPosition.y;
             node.value = value;
             node.parent = parent;
             Debug.Log("inserte " + node.value + "\n");
         }
         else if (value > node.value) {
             Debug.Log("pasada r en n = " + n + " - vale : " + this.value + "\n");
-            parentPosition = rootPosition;
+            parentPosition = insertedPosition;
             // divido por n para q no se superpongan los hijos de nodos hermanos.
-            rootPosition.x += (float)(GameManager.TREE_X_OFFSET - n);
-            rootPosition.y -= GameManager.TREE_Y_OFFSET;
+            insertedPosition.x += (float)(GameManager.TREE_X_OFFSET - n);
+            insertedPosition.y -= GameManager.TREE_Y_OFFSET;
             Debug.Log("inserta" + value + " en derecha de " + node.value + " parent position: " + parentPosition.x + "," + parentPosition.y+"\n");
-            node.rightChild = Insert(node.rightChild, ref value, ref rootPosition, ref parentPosition, n, node);
+            node.rightChild = Insert(node.rightChild, ref value, ref insertedPosition, ref parentPosition, n, node);
 
             /*Debug.Log("el hijo derecho de " + root.value + " es " + rightChild + " y su valor es " + rightChild.value + "\n");*/
         } else {
             Debug.Log("pasada l en n = " + n + " - vale : " + this.value + "\n");
-            parentPosition = rootPosition;
+            parentPosition = insertedPosition;
             // divido por n para q no se superpongan los hijos de nodos hermanos.
-            rootPosition.x -= (float)(GameManager.TREE_X_OFFSET - n);
-            rootPosition.y -= GameManager.TREE_Y_OFFSET;
+            insertedPosition.x -= (float)(GameManager.TREE_X_OFFSET - n);
+            insertedPosition.y -= GameManager.TREE_Y_OFFSET;
             Debug.Log("inserta" + value + " en izquierda de " + node.value + " parent position: " + parentPosition.x + "," + parentPosition.y+ "\n");
-            node.leftChild = Insert(node.leftChild, ref value, ref rootPosition, ref parentPosition, n, node);
+            node.leftChild = Insert(node.leftChild, ref value, ref insertedPosition, ref parentPosition, n, node);
             /*Debug.Log("el hijo izquierdo de " + root.value + " es " + leftChild + " y su valor es " + leftChild.value + "\n");*/
         }
 

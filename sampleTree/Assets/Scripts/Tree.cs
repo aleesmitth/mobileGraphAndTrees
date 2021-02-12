@@ -41,39 +41,39 @@ public class Tree : MonoBehaviour {
     }
 
 
-    public void Insert() {
-        for (int i = 0; i < 50; i++) {
-            Vector2 insertedPosition = root.position;
-            Vector2 parentPosition = Vector2.zero;
-            int value = Random.Range(0, 500);
-            try {
-                root = root.Insert(root, ref value, ref insertedPosition, ref parentPosition, -1);
-            }
-            catch (HeightTreeLimitException e) {
-                Debug.Log(e.Message);
-                return;
-            }
-            catch (PositionOccupiedByNodeException e) {
-                Debug.Log(e.Message);
-                return;
-            }
-
-            GameObject node = Instantiate(treeNodePrefab, insertedPosition, Quaternion.identity);
-            node.GetComponentInChildren<TextMeshProUGUI>().text = value.ToString();
-            
-            // restaura color del nodo insertado previamente a la normalidad y dibuja branch
-            if (lastInsertedNodeBuffer != null) {
-                print(lastInsertedNodeBuffer.GetComponentInChildren<MeshRenderer>().material = defaultNodeMat);
-                LineRenderer lineRenderer = node.GetComponent<LineRenderer>();
-                lineRenderer.SetPosition(0, new Vector3(insertedPosition.x, insertedPosition.y, 0));
-                lineRenderer.SetPosition(1, new Vector3(parentPosition.x, parentPosition.y, 0));
-            }
-            lastInsertedNodeBuffer = node;
-
-            AddNodeToDictionary(node, insertedPosition);
-            /*print(value);
-            print(insertedPosition.x + " " + insertedPosition.y);*/
+    public void Insert(int value) {
+        Vector2 insertedPosition = root.position;
+        Vector2 parentPosition = Vector2.zero;
+        try {
+            root = root.Insert(root, ref value, ref insertedPosition, ref parentPosition, -1);
         }
+        catch (HeightTreeLimitException e) {
+            Debug.Log(e.Message);
+            return;
+        }
+        catch (PositionOccupiedByNodeException e) {
+            Debug.Log(e.Message);
+            return;
+        }
+
+        GameObject node = NodePool.instance.Get();
+        node.transform.position = insertedPosition;
+        node.transform.rotation = Quaternion.identity;
+        //Instantiate(treeNodePrefab, insertedPosition, Quaternion.identity);
+        node.GetComponentInChildren<TextMeshProUGUI>().text = value.ToString();
+        
+        // restaura color del nodo insertado previamente a la normalidad y dibuja branch
+        if (lastInsertedNodeBuffer != null) {
+            print(lastInsertedNodeBuffer.GetComponentInChildren<MeshRenderer>().material = defaultNodeMat);
+            LineRenderer lineRenderer = node.GetComponent<LineRenderer>();
+            lineRenderer.SetPosition(0, new Vector3(insertedPosition.x, insertedPosition.y, 0));
+            lineRenderer.SetPosition(1, new Vector3(parentPosition.x, parentPosition.y, 0));
+        }
+        lastInsertedNodeBuffer = node;
+
+        AddNodeToDictionary(node, insertedPosition);
+        /*print(value);
+        print(insertedPosition.x + " " + insertedPosition.y);*/
     }
 
     private void AddNodeToDictionary(GameObject node, Vector3 insertedPosition) {
@@ -100,7 +100,7 @@ public class Tree : MonoBehaviour {
         print("LLEGUE HASTA FINAL DE DELETE Y BORRE EL " + nodesDictionary[deletedNodeKey].transform.position);
         
         //borro el nodo de la escena
-        Destroy(nodesDictionary[deletedNodeKey]);
+        NodePool.instance.DestroyObject(nodesDictionary[deletedNodeKey]); 
         //borro el nodo de mi lista de nodos activos
         nodesDictionary.Remove(deletedNodeKey);
         //var key = nodePosition.x.ToString(CultureInfo.InvariantCulture) + nodePosition.y;

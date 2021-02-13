@@ -10,7 +10,7 @@ public class GameManager : MonoBehaviour {
     public const int TREE_X_OFFSET = 10;
     public const int TREE_Y_OFFSET = 4;
     public const char MAGIC_KEY = '*';
-    public Tree tree;
+    public TreeContainer treeContainer;
     public UIManager uiManager;
     
     private int inputNumber = default(int);
@@ -28,8 +28,8 @@ public class GameManager : MonoBehaviour {
         DontDestroyOnLoad( this.gameObject );
     }
 
-    public bool IsPositionOccupied(float x, float y) {
-        return tree.IsPositionOccupied(x, y);
+    public bool IsPositionOccupied(Vector2 position) {
+        return treeContainer.IsPositionOccupied(position);
     }
 
     public void SetInputNumber(TMP_InputField input) {
@@ -69,11 +69,11 @@ public class GameManager : MonoBehaviour {
 
     public void InserRandom() {
         for (int i = 0 ; i < this.inputNumber ; i++) {
-            tree.Insert(Random.Range(0, 999));
+            treeContainer.Insert(Random.Range(0, 999));
         }
     }
 
     public void Insert() {
-        tree.Insert(this.inputNumber);
+        treeContainer.Insert(this.inputNumber);
     }
 }

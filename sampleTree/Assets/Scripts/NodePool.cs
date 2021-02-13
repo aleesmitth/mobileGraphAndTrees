@@ -7,6 +7,8 @@ public class NodePool : MonoBehaviour {
     public Transform parent;
     public int growthSize;
     public static NodePool instance;
+    [SerializeField]
+    public Material newNodeMaterial;
     private readonly Queue<GameObject> queue = new Queue<GameObject>();
 
     private void Awake() {
@@ -40,6 +42,8 @@ public class NodePool : MonoBehaviour {
     }
 
     public void DestroyObject(GameObject pooledObject) {
+        ResetLineRenderer(pooledObject);
+        ResetMaterial(pooledObject);
         pooledObject.SetActive(false);
         queue.Enqueue(pooledObject);
     }
@@ -51,5 +55,17 @@ public class NodePool : MonoBehaviour {
             pooledObject.SetActive(false);
             queue.Enqueue(pooledObject);
         }
+    }
+
+    private void ResetLineRenderer(GameObject pooledObject) {
+        var lineRenderer = pooledObject.GetComponent<LineRenderer>();
+        var position = pooledObject.transform.position;
+        lineRenderer.SetPosition(0, position);
+        lineRenderer.SetPosition(1, position);
+        lineRenderer.enabled = false;
+    }
+
+    private void ResetMaterial(GameObject pooledObject) {
+        pooledObject.GetComponentInChildren<MeshRenderer>().material = newNodeMaterial;
     }
 }

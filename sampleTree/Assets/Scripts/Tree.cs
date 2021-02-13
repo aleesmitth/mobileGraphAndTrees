@@ -62,10 +62,11 @@ public class Tree : MonoBehaviour {
         //Instantiate(treeNodePrefab, insertedPosition, Quaternion.identity);
         node.GetComponentInChildren<TextMeshProUGUI>().text = value.ToString();
         
-        // restaura color del nodo insertado previamente a la normalidad y dibuja branch
-        if (lastInsertedNodeBuffer != null) {
-            print(lastInsertedNodeBuffer.GetComponentInChildren<MeshRenderer>().material = defaultNodeMat);
+        //si lista de nodos no esta vacia, restaura color del nodo insertado previamente a la normalidad y dibuja branch
+        if (nodesDictionary.Count > 0) {
+            lastInsertedNodeBuffer.GetComponentInChildren<MeshRenderer>().material = defaultNodeMat;
             LineRenderer lineRenderer = node.GetComponent<LineRenderer>();
+            lineRenderer.enabled = true;
             lineRenderer.SetPosition(0, new Vector3(insertedPosition.x, insertedPosition.y, 0));
             lineRenderer.SetPosition(1, new Vector3(parentPosition.x, parentPosition.y, 0));
         }

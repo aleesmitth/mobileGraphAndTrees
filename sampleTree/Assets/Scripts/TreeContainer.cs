@@ -15,9 +15,13 @@ public class TreeContainer : MonoBehaviour {
     [SerializeField]
     public Material defaultNodeMat;
 
+    private bool AVLTree;
+
     private void Awake() {
+        AVLTree = true;
         nodesDictionary = new Dictionary<string, GameObject>();
-        root = new BSTNode {Value = -1, Position = new Vector2(-GameManager.TREE_X_OFFSET, GameManager.TREE_Y_OFFSET)};
+        //root = new BSTNode {Value = -1, Position = new Vector2(-GameManager.TREE_X_OFFSET, GameManager.TREE_Y_OFFSET)};
+        root = new AVLNode() {Value = -1, Position = new Vector2(-GameManager.TREE_X_OFFSET, GameManager.TREE_Y_OFFSET), Depth = -1};
     }
 
     private void OnEnable() {
@@ -32,8 +36,10 @@ public class TreeContainer : MonoBehaviour {
     public void Insert(int value) {
         Vector2 insertedPosition = root.Position;
         Vector2 parentPosition = Vector2.zero;
+        Dictionary<string, List<Vector2>> updateBalanceNodes = new Dictionary<string, List<Vector2>>();
         try {
-            root = root.Insert(root, ref value, ref insertedPosition, ref parentPosition, 1);
+            root.Insert(ref root, ref value, ref insertedPosition, ref parentPosition, updateBalanceNodes);
+            //root.Insert(ref root, ref value, ref insertedPosition, ref parentPosition);
         }
         catch (HeightTreeLimitException e) {
             Debug.Log(e.Message);
@@ -54,12 +60,23 @@ public class TreeContainer : MonoBehaviour {
             lastInsertedNodeBuffer.GetComponentInChildren<MeshRenderer>().material = defaultNodeMat;
             LineRenderer lineRenderer = node.GetComponent<LineRenderer>();
             lineRenderer.enabled = true;
-            lineRenderer.SetPosition(0, new Vector3(insertedPosition.x, insertedPosition.y, 0));
-            lineRenderer.SetPosition(1, new Vector3(parentPosition.x, parentPosition.y, 0));
+            lineRenderer.SetPosition(0, insertedPosition);
+            lineRenderer.SetPosition(1, parentPosition);
         }
         
         lastInsertedNodeBuffer = node;
         AddNodeToDictionary(node, insertedPosition);
+        foreach (var updatedNode in updateBalanceNodes) {
+            nodesDictionary[updatedNode.Key].transform.position = updatedNode.Value[0];
+            LineRenderer lineRenderer = nodesDictionary[updatedNode.Key].GetComponent<LineRenderer>();
+            lineRenderer.enabled = true;
+            lineRenderer.SetPosition(0, updatedNode.Value[0]);
+            lineRenderer.SetPosition(1, updatedNode.Value[1]);
+        }
+
+        foreach (var updatedNode in updateBalanceNodes) {
+            print("el de: " + updatedNode.Key + " pasa a: " + updatedNode.Value);
+        }
     }
 
     private void AddNodeToDictionary(GameObject node, Vector3 insertedPosition) {
@@ -105,5 +122,13 @@ public class TreeContainer : MonoBehaviour {
     ///makes key used to store unique node position
     public static string MakeNodeKey(Vector2 position) {
         return position.x.ToString(CultureInfo.InvariantCulture) + GameManager.MAGIC_KEY + position.y;
+    }
+
+    public void PrintHeight() {
+        root.PrintHeight(root);
+    }
+    
+    public void PrintDepth() {
+        root.PrintDepth(root);
     }
 }

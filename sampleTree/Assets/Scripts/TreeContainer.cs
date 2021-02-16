@@ -21,7 +21,7 @@ public class TreeContainer : MonoBehaviour {
         AVLTree = true;
         nodesDictionary = new Dictionary<string, GameObject>();
         //root = new BSTNode {Value = -1, Position = new Vector2(-GameManager.TREE_X_OFFSET, GameManager.TREE_Y_OFFSET)};
-        root = new AVLNode() {Value = -1, Position = new Vector2(-GameManager.TREE_X_OFFSET, GameManager.TREE_Y_OFFSET), Depth = -1};
+        root = new AVLNode() {Value = -1, Position = new Vector2(-GameManager.TREE_X_OFFSET, GameManager.TREE_Y_OFFSET), Depth = 0};
     }
 
     private void OnEnable() {
@@ -66,12 +66,20 @@ public class TreeContainer : MonoBehaviour {
         
         lastInsertedNodeBuffer = node;
         AddNodeToDictionary(node, insertedPosition);
+        
+        var updatedNodesGameObjects = new List<GameObject>();
         foreach (var updatedNode in updateBalanceNodes) {
             nodesDictionary[updatedNode.Key].transform.position = updatedNode.Value[0];
+            updatedNodesGameObjects.Add(nodesDictionary[updatedNode.Key]);
             LineRenderer lineRenderer = nodesDictionary[updatedNode.Key].GetComponent<LineRenderer>();
             lineRenderer.enabled = true;
             lineRenderer.SetPosition(0, updatedNode.Value[0]);
             lineRenderer.SetPosition(1, updatedNode.Value[1]);
+            nodesDictionary.Remove(updatedNode.Key);
+        }
+
+        foreach (var nodeGameObject in updatedNodesGameObjects) {
+            nodesDictionary.Add(MakeNodeKey((Vector2)nodeGameObject.transform.position), nodeGameObject);
         }
 
         foreach (var updatedNode in updateBalanceNodes) {

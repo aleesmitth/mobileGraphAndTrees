@@ -97,7 +97,16 @@ public class AVLNode : BinaryTreeNode, ITreeNode {
         UpdateBalanceFactor(headNode);
         UpdateBalanceFactor(headNode.rightChild);
         UpdateBalanceFactor(headNode.leftChild);
+        UpdateDepth(headNode);
+        Debug.Log("Position of " + headNode.Value + " will be " + avlNode.Position);
         UpdatePosition(headNode, avlNode.Position, balancedNodesPositions);
+    }
+
+    private void UpdateDepth(AVLNode node) {
+        if (node == null) return;
+        node.Depth = node.parent.Depth + 1;
+        UpdateDepth(node.leftChild);
+        UpdateDepth(node.rightChild);
     }
 
     private void UpdatePosition(AVLNode avlNode, Vector2 position, Dictionary<string,List<Vector2>> balancedNodesPositions) {
@@ -112,6 +121,9 @@ public class AVLNode : BinaryTreeNode, ITreeNode {
         else {
             balancedNodesPositions.Add(key, new List<Vector2> {position, avlNode.parent.Position});
         }
+        //hardcoded to ignore my invisible root, otherwise it'll draw a line towards it
+        if (avlNode.parent.Value == -1) balancedNodesPositions[key][1] = position;
+        Debug.Log("se supone q el nodo " + avlNode.Value + " en la posicion " + position + " va a tener padre a " + avlNode.parent.Value + " en la posicion " + avlNode.parent.Position + "\n");
 
         avlNode.Position = position;
         var positionRight = position + new Vector2(GameManager.TREE_X_OFFSET - avlNode.Depth, -GameManager.TREE_Y_OFFSET);
@@ -122,52 +134,96 @@ public class AVLNode : BinaryTreeNode, ITreeNode {
         UpdatePosition(avlNode.leftChild, positionLeft, balancedNodesPositions);
     }
 
-    private AVLNode RightLeftRotation(AVLNode avlNode) {
-        ref var aux = ref avlNode.rightChild.leftChild;
-        avlNode.rightChild.leftChild = aux.rightChild;
-        avlNode.rightChild = aux;
-        return LeftRotation(avlNode);
+    private AVLNode RightLeftRotation(AVLNode originalHeadNode) {
+        var newMiddleNode = originalHeadNode.rightChild.leftChild;
+        var branch = newMiddleNode.rightChild;
+        
+        //do rotation
+        newMiddleNode.rightChild = originalHeadNode.rightChild;
+        newMiddleNode.rightChild.leftChild = branch;
+        originalHeadNode.rightChild = newMiddleNode;
+        
+        //update parent nodes
+        newMiddleNode.rightChild.parent = newMiddleNode;
+        if (branch != null) branch.parent = newMiddleNode.rightChild;
+        newMiddleNode.parent = originalHeadNode;
+        
+        return LeftRotation(originalHeadNode);
     }
 
-    private AVLNode LeftRightRotation(AVLNode avlNode) {
-        ref var aux = ref avlNode.leftChild.rightChild;
-        avlNode.leftChild.rightChild = aux.leftChild;
-        avlNode.leftChild = aux;
-        return RightRotation(avlNode);
+    private AVLNode LeftRightRotation(AVLNode originalHeadNode) {
+        var newMiddleNode = originalHeadNode.leftChild.rightChild;
+        var branch = newMiddleNode.leftChild;
+        
+        //do rotation
+        newMiddleNode.leftChild = originalHeadNode.leftChild;
+        newMiddleNode.leftChild.rightChild = branch;
+        originalHeadNode.leftChild = newMiddleNode;
+        
+        //update parent nodes
+        newMiddleNode.leftChild.parent = newMiddleNode;
+        if (branch != null) branch.parent = newMiddleNode.leftChild;
+        newMiddleNode.parent = originalHeadNode;
+        
+        return RightRotation(originalHeadNode);
     }
 
-    private AVLNode LeftRotation(AVLNode avlNode) {
-        ref var aux = ref avlNode.rightChild.leftChild;
-        avlNode.rightChild.leftChild = avlNode;
-        avlNode.rightChild = aux;
-        return avlNode;
-    }
-
-    private AVLNode RightRotation(AVLNode avlNode) {
-        Debug.Log("LLEGUEACA-------------------------------------");
-        var original = avlNode;
-        var node = avlNode.leftChild;
-        var branch = avlNode.leftChild.rightChild;
-        var parentNode = avlNode.parent;
-        if (parentNode.rightChild != null && parentNode.rightChild.Position == avlNode.Position) {
-            parentNode.rightChild = original.leftChild;
+    private AVLNode LeftRotation(AVLNode originalHeadNode) {
+        var newHeadNode = originalHeadNode.rightChild;
+        var branch = originalHeadNode.rightChild.leftChild;
+        var parentNode = originalHeadNode.parent;
+        
+        //position the head node according to parent of previous head node.
+        if (parentNode.rightChild != null && parentNode.rightChild.Position == originalHeadNode.Position) {
+            parentNode.rightChild = newHeadNode;
         }
         else {
-            parentNode.leftChild = original.leftChild;
+            parentNode.leftChild = newHeadNode;
         }
 
-        node.leftChild = original.leftChild.leftChild;
-        node.rightChild = original;
-        node.rightChild.leftChild = branch;
-        Debug.Log("LLEGUEACA------------------------------------- " + node.Value + " - "
-        + node.leftChild.Value + " - " + node.rightChild.Value + " - \n");
-        Debug.Log("LLEGUEACA------------------------------------- " + node.Position + " - "
-                  + node.leftChild.Position + " - " + node.rightChild.Position + " - \n");
-        node.rightChild.parent = node;
-        node.Depth--;
-        node.rightChild.Depth++;
-        node.leftChild.Depth--;
-        return node;
+        //do rotation
+        newHeadNode.leftChild = originalHeadNode;
+        originalHeadNode.rightChild = branch;
+        
+        //update parent nodes
+        newHeadNode.parent = parentNode;
+        originalHeadNode.parent = newHeadNode;
+        if (branch != null) branch.parent = originalHeadNode;
+        
+        //update depth of head node
+        newHeadNode.Depth--;
+        
+        //return head node
+        return newHeadNode;
+    }
+
+    private AVLNode RightRotation(AVLNode originalHeadNode) {
+        var newHeadNode = originalHeadNode.leftChild;
+        var branch = originalHeadNode.leftChild.rightChild;
+        var parentNode = originalHeadNode.parent;
+        
+        //position the head node according to parent of previous head node.
+        if (parentNode.rightChild != null && parentNode.rightChild.Position == originalHeadNode.Position) {
+            parentNode.rightChild = newHeadNode;
+        }
+        else {
+            parentNode.leftChild = newHeadNode;
+        }
+
+        //do rotation
+        newHeadNode.rightChild = originalHeadNode;
+        originalHeadNode.leftChild = branch;
+        
+        //update parent nodes
+        newHeadNode.parent = parentNode;
+        originalHeadNode.parent = newHeadNode;
+        if (branch != null) branch.parent = originalHeadNode;
+        
+        //update depth of head node
+        newHeadNode.Depth--;
+        
+        //return head node
+        return newHeadNode;
     }
 
     private void InsertNodeRecursive(ref AVLNode childNode, ref int value, ref Vector2 insertedPosition,

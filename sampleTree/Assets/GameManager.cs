@@ -76,4 +76,9 @@ public class GameManager : MonoBehaviour {
     public void Insert() {
         treeContainer.Insert(this.inputNumber);
     }
+
+    public void ChangeTreeType() {
+        treeContainer.ChangeTreeType();
+        uiManager.ChangeTreeType();
+    }
 }

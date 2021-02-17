@@ -16,9 +16,10 @@ public interface ITreeNode {
     int Value { get; }
     Vector2 Position { get; }
     ITreeNode SearchNode(Vector2 nodePosition, int value, ITreeNode root);
-    void DeleteNode(ITreeNode node, Dictionary<string,string> textNodesUpdate, out Vector2 deletedNodePosition);
+    void DeleteNode(ITreeNode node, Dictionary<string,string> textNodesUpdate, out Vector2 deletedNodePosition, Dictionary<string,List<Vector2>> balancedNodesPositions = null);
     //---methods for debugging---
     void PrintTree(ITreeNode root);
     void PrintHeight(ITreeNode root);
     void PrintDepth(ITreeNode root);
+    ITreeNode ChangeTreeType();
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using UnityEngine;
 
 public class AVLNode : BinaryTreeNode, ITreeNode {
@@ -37,8 +38,55 @@ public class AVLNode : BinaryTreeNode, ITreeNode {
         Insert(ref avlNode, ref value, ref insertedPosition, ref parentPosition, balancedNodesPositions);
     }
 
-    public void DeleteNode(ITreeNode node, Dictionary<string, string> textNodesUpdate, out Vector2 deletedNodePosition) {
-        throw new NotImplementedException();
+    public void DeleteNode(ITreeNode node, Dictionary<string, string> textNodesUpdate, out Vector2 deletedNodePosition,
+        Dictionary<string,List<Vector2>> balancedNodesPositions = null) {
+        DeleteNode((BinaryTreeNode)node, textNodesUpdate, out deletedNodePosition, balancedNodesPositions);
+    }
+    
+    private void DeleteNode(BinaryTreeNode node, Dictionary<string, string> textNodesUpdate,
+        out Vector2 deletedNodePosition, Dictionary<string,List<Vector2>> balancedNodesPositions = null) {
+        if (node.RightChild == null && node.LeftChild == null) {
+            deletedNodePosition = node.Position;
+            //deletes node from the tree, leaving parent without corresponding child.
+            if (node.Parent.RightChild != null && node.Parent.RightChild.Position == node.Position) node.Parent.RightChild = null;
+            else {
+                node.Parent.LeftChild = null;
+            }
+        }
+        else if (node.LeftChild != null && node.RightChild == null) {
+            var maxLeft = FindMax(node.LeftChild);
+            DeleteNodeRecursive(node, maxLeft, textNodesUpdate, out deletedNodePosition, balancedNodesPositions);
+        }
+        else {
+            var minRight = FindMin(node.RightChild);
+            DeleteNodeRecursive(node, minRight, textNodesUpdate, out deletedNodePosition, balancedNodesPositions);
+        }
+        if (node.Value <= -1) return;
+        BalanceTreeFromBelow((AVLNode) node, balancedNodesPositions);
+    }
+
+    private void BalanceTreeFromBelow(AVLNode node,
+        Dictionary<string,List<Vector2>> balancedNodesPositions = null) {
+        if (node == null) return;
+        if (node.Value == -1) return;
+        balancedNodesPositions ??= new Dictionary<string, List<Vector2>>();
+        var nodeParent = node.parent;
+        UpdateBalanceFactor(node);
+        BalanceNode(node, balancedNodesPositions);
+        UpdateBalanceFactor(nodeParent);
+        BalanceTreeFromBelow(nodeParent, balancedNodesPositions);
+        Debug.Log("PASEXD \n");
+    }
+
+    private void DeleteNodeRecursive(BinaryTreeNode deletedNode, BinaryTreeNode nodeToDelete, Dictionary<string, string> textNodesUpdate,
+        out Vector2 deletedNodePosition, Dictionary<string,List<Vector2>> balancedNodesPositions = null) {
+        
+        deletedNode.Value = nodeToDelete.Value;
+        
+        var key = TreeContainer.MakeNodeKey(deletedNode.Position);
+        textNodesUpdate.Add(key, deletedNode.Value.ToString(CultureInfo.InvariantCulture));
+            
+        DeleteNode(nodeToDelete, textNodesUpdate, out deletedNodePosition, balancedNodesPositions);
     }
 
     private void Insert(ref AVLNode avlNode, ref int value, ref Vector2 insertedPosition,
@@ -71,7 +119,7 @@ public class AVLNode : BinaryTreeNode, ITreeNode {
         if(avlNode == null) return;
         avlNode.Height = GetHeight(avlNode);
         Debug.Log(avlNode.Height);
-        Debug.Log("Height: " + avlNode.Height);
+        Debug.Log("Height of: " + avlNode.Value + " is " + avlNode.Height);
         avlNode.balanceFactor = GetHeight(avlNode.leftChild) - GetHeight(avlNode.rightChild);
         Debug.Log("Balance factor: " + avlNode.balanceFactor);
     }
@@ -122,7 +170,7 @@ public class AVLNode : BinaryTreeNode, ITreeNode {
             balancedNodesPositions.Add(key, new List<Vector2> {position, avlNode.parent.Position});
         }
         //hardcoded to ignore my invisible root, otherwise it'll draw a line towards it
-        if (avlNode.parent.Value == -1) balancedNodesPositions[key][1] = position;
+        if (avlNode.parent.Value == -1 && balancedNodesPositions.ContainsKey(key)) balancedNodesPositions[key][1] = position;
         Debug.Log("se supone q el nodo " + avlNode.Value + " en la posicion " + position + " va a tener padre a " + avlNode.parent.Value + " en la posicion " + avlNode.parent.Position + "\n");
 
         avlNode.Position = position;
@@ -233,13 +281,8 @@ public class AVLNode : BinaryTreeNode, ITreeNode {
         insertedPosition += new Vector2(childDirection * (GameManager.TREE_X_OFFSET - parentNode.Depth), -GameManager.TREE_Y_OFFSET);
         Insert(ref childNode, ref value, ref insertedPosition, ref parentPosition, balancedNodesPositions, parentNode.Depth, parentNode);
     }
-
-    private void PrintTree(AVLNode avlNode) {
-        //implement
-    }
-
-    private AVLNode SearchNode(Vector2 nodeposition, int value, AVLNode avlNode) {
-        //implement
-        return null;
+    
+    public ITreeNode ChangeTreeType() {
+        return new BSTNode {Value = -1, Position = new Vector2(-GameManager.TREE_X_OFFSET, GameManager.TREE_Y_OFFSET)};
     }
 }

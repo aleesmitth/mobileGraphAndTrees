@@ -31,7 +31,7 @@ public class BSTNode : BinaryTreeNode, ITreeNode {
 
     public BSTNode() { leftChild = null; rightChild = null; }
 
-    public void DeleteNode(ITreeNode node, Dictionary<string, string> textNodesUpdate, out Vector2 deletedNodePosition) {
+    public void DeleteNode(ITreeNode node, Dictionary<string, string> textNodesUpdate, out Vector2 deletedNodePosition, Dictionary<string,List<Vector2>> balancedNodesPositions = null) {
         DeleteNode((BinaryTreeNode)node, textNodesUpdate, out deletedNodePosition);
     }
 
@@ -73,22 +73,22 @@ public class BSTNode : BinaryTreeNode, ITreeNode {
             Insert(ref childNode, ref value, ref insertedPosition, ref parentPosition, parentNode.Depth, parentNode);
     }
 
-    private void DeleteNode(BinaryTreeNode bstNode, Dictionary<string, string> textNodesUpdate, out Vector2 deletedNodePosition) {
-        if (bstNode.RightChild == null && bstNode.LeftChild == null) {
-            deletedNodePosition = bstNode.Position;
+    private void DeleteNode(BinaryTreeNode node, Dictionary<string, string> textNodesUpdate, out Vector2 deletedNodePosition) {
+        if (node.RightChild == null && node.LeftChild == null) {
+            deletedNodePosition = node.Position;
             //deletes node from the tree, leaving parent without corresponding child.
-            if (bstNode.Parent.RightChild != null && bstNode.Parent.RightChild.Position == bstNode.Position) bstNode.Parent.RightChild = null;
+            if (node.Parent.RightChild != null && node.Parent.RightChild.Position == node.Position) node.Parent.RightChild = null;
             else {
-                bstNode.Parent.LeftChild = null;
+                node.Parent.LeftChild = null;
             }
         }
-        else if (bstNode.LeftChild != null && bstNode.RightChild == null) {
-            var maxLeft = FindMax(bstNode.LeftChild);
-            DeleteNodeRecursive(bstNode, maxLeft, textNodesUpdate, out deletedNodePosition);
+        else if (node.LeftChild != null && node.RightChild == null) {
+            var maxLeft = FindMax(node.LeftChild);
+            DeleteNodeRecursive(node, maxLeft, textNodesUpdate, out deletedNodePosition);
         }
         else {
-            var minRight = FindMin(bstNode.RightChild);
-            DeleteNodeRecursive(bstNode, minRight, textNodesUpdate, out deletedNodePosition);
+            var minRight = FindMin(node.RightChild);
+            DeleteNodeRecursive(node, minRight, textNodesUpdate, out deletedNodePosition);
         }
     }
 
@@ -101,5 +101,9 @@ public class BSTNode : BinaryTreeNode, ITreeNode {
         textNodesUpdate.Add(key, deletedNode.Value.ToString(CultureInfo.InvariantCulture));
             
         DeleteNode(nodeToDelete, textNodesUpdate, out deletedNodePosition);
+    }
+    
+    public ITreeNode ChangeTreeType() {
+        return new AVLNode() {Value = -1, Position = new Vector2(-GameManager.TREE_X_OFFSET, GameManager.TREE_Y_OFFSET), Depth = 0};
     }
 }

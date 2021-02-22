@@ -97,7 +97,7 @@ public class BSTNode : BinaryTreeNode, ITreeNode {
         
         deletedNode.Value = nodeToDelete.Value;
         
-        var key = TreeContainer.MakeNodeKey(deletedNode.Position);
+        var key = GameManager.MakeNodeKey(deletedNode.Position);
         textNodesUpdate.Add(key, deletedNode.Value.ToString(CultureInfo.InvariantCulture));
             
         DeleteNode(nodeToDelete, textNodesUpdate, out deletedNodePosition);

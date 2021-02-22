@@ -10,24 +10,24 @@ public class TreeContainer : MonoBehaviour {
     private ITreeNode root = default(ITreeNode);
     //the key is concatenation of x position + y position of the node.
     private Dictionary<string, GameObject> nodesDictionary;
-    public GameObject treeNodePrefab;
     private GameObject lastInsertedNodeBuffer = default(GameObject);
     [SerializeField]
     public Material defaultNodeMat;
 
-    private void Awake() {
-        nodesDictionary = new Dictionary<string, GameObject>();
-        root = new BSTNode {Value = -1, Position = new Vector2(-GameManager.TREE_X_OFFSET, GameManager.TREE_Y_OFFSET)};
-    }
-
     private void OnEnable() {
+        CreateRoot();
         EventManager.onDeleteNode += DeleteNode;
     }
 
     private void OnDisable() {
         EventManager.onDeleteNode -= DeleteNode;
+        DeleteEverything();
     }
 
+    private void CreateRoot() {
+        nodesDictionary = new Dictionary<string, GameObject>();
+        root = new BSTNode {Value = -1, Position = new Vector2(-GameManager.TREE_X_OFFSET, GameManager.TREE_Y_OFFSET)};
+    }
 
     public void Insert(int value) {
         Vector2 insertedPosition = root.Position;
@@ -45,7 +45,7 @@ public class TreeContainer : MonoBehaviour {
             return;
         }
         //getting node from the pool and initializing it
-        GameObject node = NodePool.instance.Get();
+        GameObject node = TreeNodePool.instance.Get();
         node.transform.position = insertedPosition;
         node.transform.rotation = Quaternion.identity;
         node.GetComponentInChildren<TextMeshProUGUI>().text = value.ToString();
@@ -66,7 +66,7 @@ public class TreeContainer : MonoBehaviour {
     }
 
     private void AddNodeToDictionary(GameObject node, Vector3 insertedPosition) {
-        var key = MakeNodeKey(insertedPosition);
+        var key = GameManager.MakeNodeKey(insertedPosition);
         nodesDictionary.Add(key, node);
     }
 
@@ -82,7 +82,7 @@ public class TreeContainer : MonoBehaviour {
         var node = root.SearchNode(nodePosition, int.Parse(textMeshProUGUI.text), root);
         root.DeleteNode(node, textNodesUpdate, out Vector2 deletedNodePosition, updateBalanceNodes);
         Debug.Log("OVERHERE\n");
-        var deletedNodeKey = MakeNodeKey(deletedNodePosition);
+        var deletedNodeKey = GameManager.MakeNodeKey(deletedNodePosition);
         //
         //updates text of modified nodes.
         foreach(KeyValuePair<string, string> entry in textNodesUpdate) {
@@ -91,7 +91,7 @@ public class TreeContainer : MonoBehaviour {
         
 
         //deletes node from the scene pooling it back.
-        NodePool.instance.DestroyObject(nodesDictionary[deletedNodeKey]); 
+        TreeNodePool.instance.DestroyObject(nodesDictionary[deletedNodeKey]); 
         //deletes the node from my active nodes list.
         nodesDictionary.Remove(deletedNodeKey);
         
@@ -116,7 +116,7 @@ public class TreeContainer : MonoBehaviour {
         }
 
         foreach (var nodeGameObject in updatedNodesGameObjects) {
-            nodesDictionary.Add(MakeNodeKey(nodeGameObject.transform.position), nodeGameObject);
+            nodesDictionary.Add(GameManager.MakeNodeKey(nodeGameObject.transform.position), nodeGameObject);
         }
 
         foreach (var updatedNode in updateBalanceNodes) {
@@ -131,13 +131,8 @@ public class TreeContainer : MonoBehaviour {
     }
 
     public bool IsPositionOccupied(Vector2 position) {
-        var key = MakeNodeKey(position);
+        var key = GameManager.MakeNodeKey(position);
         return nodesDictionary.ContainsKey(key);
-    }
-
-    ///makes key used to store unique node position
-    public static string MakeNodeKey(Vector2 position) {
-        return position.x.ToString(CultureInfo.InvariantCulture) + GameManager.MAGIC_KEY + position.y;
     }
 
     public void PrintHeight() {
@@ -149,10 +144,14 @@ public class TreeContainer : MonoBehaviour {
     }
 
     public void ChangeTreeType() {
+        DeleteEverything();
         root = root.ChangeTreeType();
+    }
+
+    private void DeleteEverything() {
         foreach (var node in nodesDictionary) {
             //deletes node from the scene pooling it back.
-            NodePool.instance.DestroyObject(node.Value); 
+            TreeNodePool.instance.DestroyObject(node.Value); 
         }
         
         nodesDictionary.Clear();

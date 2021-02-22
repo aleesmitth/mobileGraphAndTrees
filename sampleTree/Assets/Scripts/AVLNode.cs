@@ -83,7 +83,7 @@ public class AVLNode : BinaryTreeNode, ITreeNode {
         
         deletedNode.Value = nodeToDelete.Value;
         
-        var key = TreeContainer.MakeNodeKey(deletedNode.Position);
+        var key = GameManager.MakeNodeKey(deletedNode.Position);
         textNodesUpdate.Add(key, deletedNode.Value.ToString(CultureInfo.InvariantCulture));
             
         DeleteNode(nodeToDelete, textNodesUpdate, out deletedNodePosition, balancedNodesPositions);
@@ -161,7 +161,7 @@ public class AVLNode : BinaryTreeNode, ITreeNode {
         if (avlNode == null) return;
         balancedNodesPositions ??= new Dictionary<string, List<Vector2>>();
         
-        var key = TreeContainer.MakeNodeKey(avlNode.Position);
+        var key = GameManager.MakeNodeKey(avlNode.Position);
         if (balancedNodesPositions.ContainsKey(key)) {
             balancedNodesPositions[key][0] = position;
             balancedNodesPositions[key][1] = avlNode.parent.Position;

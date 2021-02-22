@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using TMPro;
@@ -9,9 +10,11 @@ public class GameManager : MonoBehaviour {
     public const int MAX_HEIGHT = 9;
     public const int TREE_X_OFFSET = 10;
     public const int TREE_Y_OFFSET = 4;
-    public const char MAGIC_KEY = '*';
+    private const char MAGIC_KEY = '*';
     public TreeContainer treeContainer;
+    public GraphContainer graphContainer;
     public UIManager uiManager;
+    public int BALL_MARGIN = 10;
     
     private int inputNumber = default(int);
     
@@ -30,6 +33,11 @@ public class GameManager : MonoBehaviour {
 
     public bool IsPositionOccupied(Vector2 position) {
         return treeContainer.IsPositionOccupied(position);
+    }
+
+    ///makes key used to store unique node position
+    public static string MakeNodeKey(Vector2 position) {
+        return position.x.ToString(CultureInfo.InvariantCulture) + GameManager.MAGIC_KEY + position.y;
     }
 
     public void SetInputNumber(TMP_InputField input) {
@@ -80,5 +88,27 @@ public class GameManager : MonoBehaviour {
     public void ChangeTreeType() {
         treeContainer.ChangeTreeType();
         uiManager.ChangeTreeType();
+    }
+
+    public void ActivateGraphMode() {
+        treeContainer.enabled = false;
+        graphContainer.enabled = true;
+    }
+    
+    public void ActivateTreeMode() {
+        graphContainer.enabled = false;
+        treeContainer.enabled = true;
+    }
+
+    public void SearchForMinNodeACTIVATED() {
+        graphContainer.SearchForMinMode();
+    }
+
+    public void DeactivateInsertMode() {
+        graphContainer.DeactivateInsertNode();
+    }
+
+    public void ActivateInsertMode() {
+        graphContainer.ActivateInsertNode();
     }
 }

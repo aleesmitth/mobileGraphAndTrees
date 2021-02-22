@@ -17,10 +17,14 @@ public class GraphContainer : MonoBehaviour {
     private bool activateInsert;
     private Rect debugNodeRect;
     private bool searchForMin;
-
     public int arrowWingsSize = 5;
     public int arrowWingSeparation = 5;
-    public Color gizmoNodeColor = Color.green;
+    
+    [SerializeField] public Color lineRendererStartColor;
+    [SerializeField] public Color lineRendererEndColor;
+    [SerializeField] public Color lineRendererPathStartColor;
+    [SerializeField] public Color lineRendererPathEndColor;
+    [SerializeField] public Color gizmoNodeColor = Color.green;
 
     private void OnEnable() {
         activateInsert = true;
@@ -104,6 +108,8 @@ public class GraphContainer : MonoBehaviour {
         meshRenderer.material = defaultNodeMat;
         LineRenderer lineRenderer = nodeGO.GetComponent<LineRenderer>();
         lineRenderer.enabled = true;
+        lineRenderer.startColor = lineRendererStartColor;
+        lineRenderer.endColor = lineRendererEndColor;
         //draw arrow
         var directionOfInsertNormalized = (selectedNode.Position - position).normalized;
         var directionOfInsert = directionOfInsertNormalized * arrowWingsSize + position;
@@ -135,18 +141,25 @@ public class GraphContainer : MonoBehaviour {
 
     private void SelectNode(Vector3 position) {
         if (selectedNode != null) {
-            
-            //do dijkstra
             if (searchForMin) {
                 var shortestPath = Dijkstra(selectedNode, position);
                 if (shortestPath == null) {
                     Debug.Log("Shortest path not found.");
                     return;
                 }
+
+                var firstSelected = false;
                 foreach (var node in shortestPath) {
+                    print(node.Position + " ESTE SALIO DE DIJSKTRA");
                     var nodeGO = nodesDictionaryGO[GameManager.MakeNodeKey(node.Position)];
                     nodeGO.GetComponentInChildren<MeshRenderer>().material = selectedNodeMat;
-                    print(node.Position + " ESTE SALIO DE DIJSKTRA");
+                    if (!firstSelected) {
+                        firstSelected = true;
+                        continue;
+                    }
+                    var lineRenderer = nodeGO.GetComponent<LineRenderer>();
+                    lineRenderer.startColor = lineRendererPathStartColor;
+                    lineRenderer.endColor = lineRendererPathEndColor;
                 }
 
                 return;
@@ -164,7 +177,8 @@ public class GraphContainer : MonoBehaviour {
     private LinkedList<IGraphNode> Dijkstra(IGraphNode startNode, Vector3 positionEndNode) {
         var key = GameManager.MakeNodeKey(positionEndNode);
         var endNode = nodesDictionary[key];
-        LinkedList<IGraphNode> unvisitedNodes = new LinkedList<IGraphNode>();
+        //LinkedList<IGraphNode> unvisitedNodes = new LinkedList<IGraphNode>();
+        var unvisitedNodes = new BinaryHeap(10);
         bool nodeFound = false;
         foreach (var node in nodesDictionary) {
             node.Value.Value = 999999;
@@ -173,22 +187,26 @@ public class GraphContainer : MonoBehaviour {
         }
 
         startNode.Value = 0;
-        unvisitedNodes.AddFirst(startNode);
-        while (unvisitedNodes.Count > 0) {
-            var currentNode = FindMinNode(unvisitedNodes);
-            unvisitedNodes.Remove(currentNode);
+        unvisitedNodes.InsertElementInHeap(startNode);
+        while (unvisitedNodes.SizeOfHeap() > 0) {
+            //var currentNode = FindMinNode(unvisitedNodes);
+            var currentNode = unvisitedNodes.ExtractHeadOfHeap();
+            //unvisitedNodes.Remove(currentNode);
             Debug.Log("Removing: " + currentNode.Position + " from the list\n");
-            foreach (var node in unvisitedNodes) {
+            /*foreach (var node in unvisitedNodes) {
                 Debug.Log("Remaining node: " + node.Position);
-            }
+            }*/
             
             if (currentNode.Position == endNode.Position) {
                 Debug.Log("found the end \n");
                 nodeFound = true;
                 break;
             }
+            
             if (currentNode.WasVisited) continue;
+            
             currentNode.WasVisited = true;
+            
             foreach (var edge in currentNode.OutEdges) {
                 float newPossiblyMinValue = edge.Weight + currentNode.Value;
                 var edgeNode = edge.node;
@@ -197,7 +215,8 @@ public class GraphContainer : MonoBehaviour {
                     edgeNode.Parent = currentNode;
                 }
                 
-                unvisitedNodes.AddFirst(edgeNode);
+                //unvisitedNodes.AddFirst(edgeNode);
+                unvisitedNodes.InsertElementInHeap(edgeNode);
                 Debug.Log("Added: " + edgeNode.Position + " to the list\n");
             }
         }
@@ -249,6 +268,9 @@ public class GraphContainer : MonoBehaviour {
     private void UnselectNodes() {
         foreach (var nodeGO in nodesDictionaryGO) {
             nodeGO.Value.GetComponentInChildren<MeshRenderer>().material = defaultNodeMat;
+            var lr = nodeGO.Value.GetComponent<LineRenderer>();
+            lr.startColor = lineRendererStartColor;
+            lr.endColor = lineRendererEndColor;
         }
 
         var selectedNodeGO = nodesDictionaryGO[GameManager.MakeNodeKey(selectedNode.Position)];

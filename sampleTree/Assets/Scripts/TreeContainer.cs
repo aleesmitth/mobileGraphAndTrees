@@ -52,11 +52,17 @@ public class TreeContainer : MonoBehaviour {
         
         //if list of nodes isn't empty, restores the color of the previous inserted node to normal, and draws branch to parent
         if (nodesDictionary.Count > 0) {
-            lastInsertedNodeBuffer.GetComponentInChildren<MeshRenderer>().material = defaultNodeMat;
+            var meshRenderer = lastInsertedNodeBuffer.GetComponentInChildren<MeshRenderer>();
+            meshRenderer.material = defaultNodeMat;
             LineRenderer lineRenderer = node.GetComponent<LineRenderer>();
             lineRenderer.enabled = true;
-            lineRenderer.SetPosition(0, insertedPosition);
-            lineRenderer.SetPosition(1, parentPosition);
+            
+            var directionOfParentNormalized = (parentPosition - insertedPosition).normalized;
+
+            var nodeSize = meshRenderer.bounds.size * directionOfParentNormalized;
+        
+            lineRenderer.SetPosition(0, insertedPosition + nodeSize);
+            lineRenderer.SetPosition(1, parentPosition - nodeSize);
         }
         
         lastInsertedNodeBuffer = node;
@@ -112,6 +118,16 @@ public class TreeContainer : MonoBehaviour {
             lineRenderer.enabled = true;
             lineRenderer.SetPosition(0, updatedNode.Value[0]);
             lineRenderer.SetPosition(1, updatedNode.Value[1]);
+
+            var meshRenderer = nodesDictionary[updatedNode.Key].GetComponentInChildren<MeshRenderer>();
+            
+            var directionOfParentNormalized = (updatedNode.Value[1] - updatedNode.Value[0]).normalized;
+
+            var nodeSize = meshRenderer.bounds.size * directionOfParentNormalized;
+        
+            lineRenderer.SetPosition(0, updatedNode.Value[0] + nodeSize);
+            lineRenderer.SetPosition(1, updatedNode.Value[1] - nodeSize);
+            
             nodesDictionary.Remove(updatedNode.Key);
         }
 

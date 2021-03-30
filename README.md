@@ -5,7 +5,7 @@ Cellphone app intended to visualize some data structures currently: bst, avl & d
 ```
 stuff to do:
 ❌bug in avl tree, it breaks when 2 nodes overlap when rotating
-❌currently each graph node can only have 1 inner edge
+✔(FIXED)currently each graph node can only have 1 inner edge
 ❌no animations
 ❌no music
 ```

@@ -34,6 +34,13 @@ public class GraphContainer : MonoBehaviour {
         CreateDictionaries();
         CreateRootNode();
         EventManager.onSelectNode += SelectNode;
+        EventManager.onNewEdgeWith += NewEdgeWith;
+    }
+
+    private void NewEdgeWith(Vector2 position) {
+        if (selectedNode == null) return;
+        if (selectedNode.HasEdgeWith(position)) return;
+        DrawArrowTowardsNode(nodesDictionaryGO[MakeNodeKey(position)]);
     }
 
     private void CreateRootNode() {
@@ -52,6 +59,7 @@ public class GraphContainer : MonoBehaviour {
     private void OnDisable() {
         Debug.Log("end modo graph\n");
         EventManager.onSelectNode -= SelectNode;
+        EventManager.onNewEdgeWith -= NewEdgeWith;
         DeleteEverything();
     }
     
@@ -94,7 +102,7 @@ public class GraphContainer : MonoBehaviour {
         print("Parent in: " + selectedNode.Position);
         var node = new GraphNode();
         nodesDictionary.Add(MakeNodeKey(position), node);
-        selectedNode.AddNode(node, position);
+        selectedNode.AddNewEdgeWith(node, position);
         
         //display the node on screen
         var nodeGO = GraphNodePool.instance.Get();
@@ -106,13 +114,31 @@ public class GraphContainer : MonoBehaviour {
         var selectedNodeGO = nodesDictionaryGO[MakeNodeKey(selectedNode.Position)];
         var meshRenderer = selectedNodeGO.GetComponentInChildren<MeshRenderer>();
         meshRenderer.material = defaultNodeMat;
+
+        DrawArrowTowardsNode(nodeGO);
+        
+        selectedNode = node;
+    }
+    /// <summary>
+    /// draws arrow from selected node towards node passed by parameter.
+    /// node needs to have mesh renderer, needed to calculate size.
+    /// </summary>
+    /// <param name="nodeGO"></param>
+    private void DrawArrowTowardsNode(GameObject nodeGO) {
+        var initialAndFinalPositions = GetArrowInitialAndFinalPositions(selectedNode.Position, nodeGO);
+        var arrowDrawer = nodeGO.GetComponentInChildren<ArrowDrawer>();
+        arrowDrawer.DrawArrow(initialAndFinalPositions.First.Value, initialAndFinalPositions.Last.Value );
+
+
+        /*Vector2 nodePosition = nodeGO.transform.position;
         LineRenderer lineRenderer = nodeGO.GetComponent<LineRenderer>();
+        var meshRenderer = nodeGO.GetComponentInChildren<MeshRenderer>();
         lineRenderer.enabled = true;
         lineRenderer.startColor = lineRendererStartColor;
         lineRenderer.endColor = lineRendererEndColor;
-        //draw arrow
-        var directionOfInsertNormalized = (selectedNode.Position - position).normalized;
-        var directionOfInsert = directionOfInsertNormalized * arrowWingsSize + position;
+        
+        var directionOfInsertNormalized = (selectedNode.Position - nodePosition).normalized;
+        var directionOfInsert = directionOfInsertNormalized * arrowWingsSize + nodePosition;
         
         var normalDirection = new Vector2(-directionOfInsertNormalized.y, directionOfInsertNormalized.x);
         normalDirection *= arrowWingSeparation;
@@ -121,16 +147,35 @@ public class GraphContainer : MonoBehaviour {
         var leftWingDirection = directionOfInsert - normalDirection;
         
 
-        //if i want the lines at the borders i should divide the meshrederer size * direction normalized by 2
+        //if i want the arrow just at the border of the node, i should divide the meshrederer size * direction normalized by 2
         var nodeSize = meshRenderer.bounds.size * directionOfInsertNormalized;
         
         lineRenderer.SetPosition(0, selectedNode.Position - nodeSize);
-        lineRenderer.SetPosition(1, position + nodeSize/2);
+        lineRenderer.SetPosition(1, nodePosition + nodeSize/2);
         lineRenderer.SetPosition(2, leftWingDirection);
-        lineRenderer.SetPosition(3, position + nodeSize/2);
-        lineRenderer.SetPosition(4, rightWingDirection);
+        lineRenderer.SetPosition(3, nodePosition + nodeSize/2);
+        lineRenderer.SetPosition(4, rightWingDirection);*/
+    }
 
-        selectedNode = node;
+    /// <summary>
+    /// returns a linked list with vector2, initial arrow position to draw in
+    /// first node of list, final position of arrow in second node of list.
+    /// </summary>
+    /// <param name="graphNode"></param>
+    /// <param name="nodeGO"></param>
+    /// <returns></returns>
+    private LinkedList<Vector2> GetArrowInitialAndFinalPositions(Vector2 originNodePosition, GameObject destinationNode) {
+        Vector2 destinationNodePosition = destinationNode.transform.position;
+        var meshRenderer = destinationNode.GetComponentInChildren<MeshRenderer>();
+        var directionOfInsertNormalized = (originNodePosition - destinationNodePosition).normalized;
+        var nodeSize = meshRenderer.bounds.size * directionOfInsertNormalized;
+        
+        var positions = new LinkedList<Vector2>();
+        //initial
+        positions.AddFirst(originNodePosition - nodeSize / 2);
+        //final
+        positions.AddLast(destinationNodePosition + nodeSize);
+        return positions;
     }
 
     private void CreateDictionaries() {
@@ -147,7 +192,26 @@ public class GraphContainer : MonoBehaviour {
                     Debug.Log("Shortest path not found.");
                     return;
                 }
+                
+                LinkedListNode<IGraphNode> currentNode = shortestPath.First;
+                for (int i = 1; i < shortestPath.Count; i++) {
+                    var currentNodeGO = nodesDictionaryGO[MakeNodeKey(currentNode.Value.Position)];
+                    currentNodeGO.GetComponentInChildren<MeshRenderer>().material = selectedNodeMat;
+                    if (currentNode.Next == null) break;
+                    var nextNode = nodesDictionaryGO[MakeNodeKey(currentNode.Next.Value.Position)];
+                    var arrowDrawer = nextNode
+                        .GetComponentInChildren<ArrowDrawer>();
 
+                    var initialAndFinalPositions 
+                        = GetArrowInitialAndFinalPositions(currentNode.Value.Position, nextNode);
+                    arrowDrawer.MakeArrowGreen(initialAndFinalPositions.First.Value);
+
+                    currentNode = currentNode.Next;
+                }
+                var LastNodeGO = nodesDictionaryGO[MakeNodeKey(currentNode.Value.Position)];
+                LastNodeGO.GetComponentInChildren<MeshRenderer>().material = selectedNodeMat;
+
+                /*
                 var firstSelected = false;
                 foreach (var node in shortestPath) {
                     print(node.Position + " ESTE SALIO DE DIJSKTRA");
@@ -160,7 +224,7 @@ public class GraphContainer : MonoBehaviour {
                     var lineRenderer = nodeGO.GetComponent<LineRenderer>();
                     lineRenderer.startColor = lineRendererPathStartColor;
                     lineRenderer.endColor = lineRendererPathEndColor;
-                }
+                }*/
 
                 return;
             }
@@ -173,7 +237,7 @@ public class GraphContainer : MonoBehaviour {
         var selectedNodeGO = nodesDictionaryGO[MakeNodeKey(selectedNode.Position)];
         selectedNodeGO.GetComponentInChildren<MeshRenderer>().material = selectedNodeMat;
     }
-
+    
     private LinkedList<IGraphNode> Dijkstra(IGraphNode startNode, Vector3 positionEndNode) {
         var key = GameManager.MakeNodeKey(positionEndNode);
         var endNode = nodesDictionary[key];
@@ -268,9 +332,8 @@ public class GraphContainer : MonoBehaviour {
     private void UnselectNodes() {
         foreach (var nodeGO in nodesDictionaryGO) {
             nodeGO.Value.GetComponentInChildren<MeshRenderer>().material = defaultNodeMat;
-            var lr = nodeGO.Value.GetComponent<LineRenderer>();
-            lr.startColor = lineRendererStartColor;
-            lr.endColor = lineRendererEndColor;
+            var arrowDrawer = nodeGO.Value.GetComponentInChildren<ArrowDrawer>();
+            arrowDrawer.RestoreArrowColors();
         }
 
         var selectedNodeGO = nodesDictionaryGO[GameManager.MakeNodeKey(selectedNode.Position)];

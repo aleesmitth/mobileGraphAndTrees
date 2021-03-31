@@ -19,12 +19,8 @@ public class GraphContainer : MonoBehaviour {
     private bool searchForMin;
     public int arrowWingsSize = 5;
     public int arrowWingSeparation = 5;
-    
-    [SerializeField] public Color lineRendererStartColor;
-    [SerializeField] public Color lineRendererEndColor;
-    [SerializeField] public Color lineRendererPathStartColor;
-    [SerializeField] public Color lineRendererPathEndColor;
-    [SerializeField] public Color gizmoNodeColor = Color.green;
+    [SerializeField] public Color gizmoNodeMarginColor = Color.white;
+    [SerializeField] public Color gizmoNodeColor = Color.yellow;
 
     private void OnEnable() {
         activateInsert = true;
@@ -88,12 +84,15 @@ public class GraphContainer : MonoBehaviour {
     private void OnDrawGizmos() {
         if (nodesDictionary == null || nodesDictionaryGO.Count == 0) return;
         foreach (var nodeGO in nodesDictionaryGO) {
-            Gizmos.color = gizmoNodeColor;
+            Gizmos.color = gizmoNodeMarginColor;
             var position = nodeGO.Value.transform.position;
             MeshRenderer mr =  nodeGO.Value.GetComponentInChildren<MeshRenderer>();
             var meshRendererBounds = mr.bounds;
-            Gizmos.DrawWireCube(new Vector3(position.x, position.y, 0.01f),
-                new Vector3(meshRendererBounds.size.x + GameManager.instance.BALL_MARGIN, meshRendererBounds.size.y + GameManager.instance.BALL_MARGIN, 0.01f));
+            //draws bounds for new nodes to be created
+            Gizmos.DrawWireCube(position, new Vector3(meshRendererBounds.size.x + GameManager.instance.BALL_MARGIN, meshRendererBounds.size.y + GameManager.instance.BALL_MARGIN, 0));
+            //draws bounds of each node, without the margin
+            Gizmos.color = gizmoNodeColor;
+            Gizmos.DrawWireCube(position, meshRendererBounds.size);
         }
     }
 

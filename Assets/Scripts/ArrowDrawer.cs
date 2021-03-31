@@ -16,24 +16,31 @@ public class ArrowDrawer : MonoBehaviour {
     }
 
     public void DrawArrow(Vector2 initialPosition, Vector2 finalPosition) {
+        //the idea is to rotate and stretch the original x axis of the sprite.
+        
+        //create the line of the arrow
         GameObject arrowBodyGO = Instantiate(iconPrefab, gameObject.transform, false);
         Icon arrowBody = arrowBodyGO.GetComponent<Icon>();
         arrowBody.SetArtworkSprite(arrowBodySprite);
         
+        //positions the sprite
         Vector2 centerPosition = (initialPosition + finalPosition) / 2f;
         arrowBodyGO.transform.position = centerPosition;
+        
+        var originalSizeX = arrowBodyGO.GetComponent<SpriteRenderer>().bounds.size.x;
+
+        //rotates the sprite
         Vector2 direction = (finalPosition - initialPosition).normalized;
         arrowBodyGO.transform.right = direction;
+        
+        
         Vector3 scale = new Vector3(1,1,1);
-        //no entiendo bien por que estas divisiones, mas q nada lo de "math.max" entre los bounds, pero sino no anda bien.
-        //si solo divido por el size en x por ejemplo, cuando pongo un nodo nuevo en eje y, anda mal
-        //viceversa con nodo en x tomando size en y
-        scale.x = Mathf.Abs((initialPosition - finalPosition).magnitude) /
-                  Math.Max(
-                      arrowBodyGO.GetComponent<SpriteRenderer>().bounds.size.x,
-                      arrowBodyGO.GetComponent<SpriteRenderer>().bounds.size.y);
+        
+        //scale the x axis. scale = distance you want to cover / original sprite size. 
+        scale.x = Vector2.Distance(initialPosition, finalPosition) / originalSizeX;
         arrowBodyGO.transform.localScale = scale;
 
+        //create the arrow head
         GameObject arrowHeadGO = Instantiate(iconPrefab, gameObject.transform, false);
         arrowHeadGO.transform.right = direction;
         Icon arrowHead = arrowHeadGO.GetComponent<Icon>();

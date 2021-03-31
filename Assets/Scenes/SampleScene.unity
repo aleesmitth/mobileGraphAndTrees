@@ -1229,7 +1229,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 127.33, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 36}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &285209149
@@ -5612,7 +5612,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 44.165, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1428973102
@@ -6869,13 +6869,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   defaultNodeMat: {fileID: 2100000, guid: 7ea78e7c51b3fb448b24b36b4ec1ebc8, type: 2}
   selectedNodeMat: {fileID: 2100000, guid: 8f1dd2ee88ee96649afa3623b021b62b, type: 2}
-  arrowWingsSize: 6
+  arrowWingsSize: 4
   arrowWingSeparation: 2
-  lineRendererStartColor: {r: 1, g: 0.19607843, b: 0, a: 1}
-  lineRendererEndColor: {r: 1, g: 0.19607843, b: 0, a: 1}
-  lineRendererPathStartColor: {r: 0, g: 1, b: 0, a: 1}
-  lineRendererPathEndColor: {r: 0, g: 1, b: 0, a: 1}
-  gizmoNodeColor: {r: 0, g: 0.7607843, b: 1, a: 1}
+  gizmoNodeMarginColor: {r: 0.4716981, g: 0.44722322, b: 0.44722322, a: 1}
+  gizmoNodeColor: {r: 0.061807394, g: 1, b: 0, a: 0.5882353}
 --- !u!1 &2037793390
 GameObject:
   m_ObjectHideFlags: 0
@@ -6997,7 +6994,7 @@ PrefabInstance:
       objectReference: {fileID: 1604234467}
     - target: {fileID: 8450719170522086542, guid: 7579b665111c9c54faade6da61a80b02, type: 3}
       propertyPath: BALL_MARGIN
-      value: 10
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 8450719170522086542, guid: 7579b665111c9c54faade6da61a80b02, type: 3}
       propertyPath: treeContainer
@@ -7082,7 +7079,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7007211259115652602, guid: 8d2cb79a09a207644bb26e5160c53a19, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 260.87
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7007211259115652602, guid: 8d2cb79a09a207644bb26e5160c53a19, type: 3}
       propertyPath: m_AnchoredPosition.y
@@ -7179,7 +7176,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7007211259115652602, guid: 8d2cb79a09a207644bb26e5160c53a19, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 127.33
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7007211259115652602, guid: 8d2cb79a09a207644bb26e5160c53a19, type: 3}
       propertyPath: m_AnchoredPosition.y

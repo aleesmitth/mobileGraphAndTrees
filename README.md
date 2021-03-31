@@ -1,4 +1,4 @@
-# sampleTree
+# graphAndTrees
 Cellphone app intended to visualize some data structures currently: bst, avl & directed graph
 
 ---

@@ -7,7 +7,6 @@ internal class NodeSelecter : MonoBehaviour{
         if (Input.GetMouseButtonDown(0))
             EventManager.OnSelectNode(transform.position);
         if (Input.GetMouseButtonDown(1)) {
-            print("hello");
             EventManager.OnNewEdgeWith(transform.position);
         }
     }

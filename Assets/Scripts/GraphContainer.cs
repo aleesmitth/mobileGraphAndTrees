@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using TMPro;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using static GameManager;
 
 public class GraphContainer : MonoBehaviour {
@@ -36,6 +37,7 @@ public class GraphContainer : MonoBehaviour {
     private void NewEdgeWith(Vector2 position) {
         if (selectedNode == null) return;
         if (selectedNode.HasEdgeWith(position)) return;
+        selectedNode.AddNewEdgeWith(nodesDictionary[MakeNodeKey(position)], position);
         DrawArrowTowardsNode(nodesDictionaryGO[MakeNodeKey(position)]);
     }
 
@@ -63,6 +65,7 @@ public class GraphContainer : MonoBehaviour {
         if (!Input.GetMouseButtonDown(0)) return;
         if (selectedNode == null) return;
         if (!activateInsert) return;
+        if (EventSystem.current.IsPointerOverGameObject()) return;
         var insertPosition = Input.mousePosition;
         insertPosition = mainCamera.ScreenToWorldPoint(new Vector3(insertPosition.x, insertPosition.y, -mainCamera.transform.position.z));
         //chekcs if mouse click wasn't near another node
@@ -309,6 +312,8 @@ public class GraphContainer : MonoBehaviour {
 
     private void DeleteEverything() {
         foreach (var node in nodesDictionaryGO) {
+            if(node.Value == null) continue;
+            node.Value.GetComponentInChildren<ArrowDrawer>().DeleteAllArrows();
             //deletes node from the scene pooling it back.
             GraphNodePool.instance.DestroyObject(node.Value); 
         }

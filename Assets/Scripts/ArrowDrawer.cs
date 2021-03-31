@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 public class ArrowDrawer : MonoBehaviour {
     public GameObject iconPrefab;
@@ -63,6 +64,13 @@ public class ArrowDrawer : MonoBehaviour {
             arrowContainer.Value.ChangeHeadSprite(arrowHeadSprite);
         }
     }
+
+    public void DeleteAllArrows() {
+        foreach (var arrowContainer in arrowContainers) {
+            arrowContainer.Value.DeleteAllArrows();
+        }
+        arrowContainers.Clear();
+    }
 }
 
 public class ArrowContainer {
@@ -80,5 +88,10 @@ public class ArrowContainer {
 
     public void ChangeHeadSprite(Sprite sprite) {
         arrowHead.SetArtworkSprite(sprite);
+    }
+
+    public void DeleteAllArrows() {
+        Object.Destroy(arrowBody.gameObject);
+        Object.Destroy(arrowHead.gameObject);
     }
 }
